@@ -170,6 +170,7 @@ def main() -> None:
             track = Serialize.full_track(raw)
         except KeyboardInterrupt:
             console.print("[red]Interrupted.[/red]")
+            sys.exit(2)
 
     if args.json:
         json.dump(raw, sys.stdout, indent=2)
