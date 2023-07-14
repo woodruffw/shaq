@@ -1,0 +1,67 @@
+[build-system]
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "shaq"
+dynamic = ["version"]
+description = "A bare-bones Shazam CLI client"
+readme = "README.md"
+license = { file = "LICENSE" }
+authors = [{ name = "William Woodruff", email = "william@yossarian.net" }]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Multimedia :: Sound/Audio",
+    "Topic :: Multimedia :: Sound/Audio :: Analysis",
+]
+dependencies = [
+    "pyaudio ~= 0.2.13",
+    "pydub ~= 0.25.1",
+    "rich ~= 13.4",
+    "shazamio ~= 0.4.0.1",
+]
+requires-python = ">=3.10"
+
+[project.urls]
+Homepage = "https://pypi.org/project/shaq/"
+Issues = "https://github.com/woodruffw/shaq/issues"
+Source = "https://github.com/woodruffw/shaq"
+
+[project.scripts]
+shaq = "shaq._cli:main"
+
+[project.optional-dependencies]
+test = ["pytest", "pytest-cov", "pretend"]
+lint = ["black", "mypy", "ruff"]
+dev = ["build", "shaq[test,lint]"]
+
+[tool.mypy]
+plugins = ["pydantic.mypy"]
+
+allow_redefinition = true
+check_untyped_defs = true
+disallow_incomplete_defs = true
+disallow_untyped_defs = true
+ignore_missing_imports = true
+no_implicit_optional = true
+show_error_codes = true
+sqlite_cache = true
+strict_equality = true
+warn_no_return = true
+warn_redundant_casts = true
+warn_return_any = true
+warn_unreachable = true
+warn_unused_configs = true
+warn_unused_ignores = true
+
+[tool.black]
+line-length = 100
+
+[tool.ruff]
+line-length = 100
+select = ["E", "F", "I", "W", "UP"]
+target-version = "py311"
