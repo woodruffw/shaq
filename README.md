@@ -5,7 +5,7 @@
 
 A bare-bones CLI client for [Shazam](https://www.shazam.com/home).
 
-![shaq in action](https://github.com/woodruffw/shaq/assets/3059210/9bf22a57-2c7b-48d8-9707-f3d7f9d9a2f4)
+![shaq in action](https://github.com/woodruffw/shaq/assets/3059210/3ee02414-b1c0-4379-8c9d-cb646dba9902)
 
 ## Installation
 
