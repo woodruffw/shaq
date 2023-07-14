@@ -1,14 +1,15 @@
 import argparse
 import asyncio
-from io import BytesIO
+import json
 import logging
 import os
 import sys
-import tempfile
 import wave
 from collections.abc import Iterator
 from contextlib import contextmanager
+from io import BytesIO
 from pathlib import Path
+from typing import Any
 
 import pyaudio
 from pydub import AudioSegment
@@ -101,7 +102,7 @@ def _from_file(console: Console, args: argparse.Namespace) -> AudioSegment:
         return input[:duration]
 
 
-async def _main(console: Console, args: argparse.Namespace) -> None:
+async def _shaq(console: Console, args: argparse.Namespace) -> dict[str, Any]:
     input: bytearray | AudioSegment
     if args.listen:
         input = _listen(console, args)
@@ -109,8 +110,7 @@ async def _main(console: Console, args: argparse.Namespace) -> None:
         input = _from_file(console, args)
 
     shazam = Shazam(language="en-US", endpoint_country="US")
-    out = await shazam.recognize_song(input)
-    console.print(Serialize.full_track(out))
+    return await shazam.recognize_song(input)  # type: ignore
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -120,6 +120,7 @@ def _parser() -> argparse.ArgumentParser:
         "--listen", action="store_true", help="detect from the system's microphone"
     )
     input_group.add_argument("--input", type=Path, help="detect from the given audio input file")
+
     parser.add_argument(
         "-d",
         "--duration",
@@ -127,6 +128,9 @@ def _parser() -> argparse.ArgumentParser:
         type=int,
         default=_DEFAULT_DURATION,
         help="only analyze the first SECS of the input (microphone or file)",
+    )
+    parser.add_argument(
+        "-j", "--json", action="store_true", help="emit Shazam's response as JSON on stdout"
     )
 
     advanced_group = parser.add_argument_group(
@@ -162,6 +166,20 @@ def main() -> None:
         logger.debug(f"parsed {args=}")
 
         try:
-            asyncio.run(_main(console, args))
+            raw = asyncio.run(_shaq(console, args))
+            track = Serialize.full_track(raw)
         except KeyboardInterrupt:
             console.print("[red]Interrupted.[/red]")
+
+    if args.json:
+        json.dump(raw, sys.stdout, indent=2)
+    else:
+        track = Serialize.full_track(raw)
+        if not track.matches:
+            print("No matches.")
+        else:
+            print(f"Track: {track.track.title}")
+            print(f"Artist: {track.track.subtitle}")
+
+    if not track.matches:
+        sys.exit(1)
