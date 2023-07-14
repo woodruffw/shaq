@@ -47,12 +47,6 @@ reformat: env/pyvenv.cfg
 		ruff --fix $(ALL_PY_SRCS) && \
 		black $(ALL_PY_SRCS)
 
-.PHONY: test tests
-test tests: env/pyvenv.cfg
-	. env/bin/activate && \
-		pytest --cov=$(PY_MODULE) $(T) $(TEST_ARGS) && \
-		python -m coverage report -m $(COV_ARGS)
-
 .PHONY: package
 package: env/pyvenv.cfg
 	. env/bin/activate && \
