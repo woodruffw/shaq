@@ -17,5 +17,8 @@ jobs:
           python-version-file: pyproject.toml
           cache: pip
 
+      - name: install native dependencies
+        run: sudo apt install -y portaudio19-dev
+
       - name: lint
         run: make lint INSTALL_EXTRA=lint
