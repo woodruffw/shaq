@@ -40,8 +40,6 @@ lint = ["black", "mypy", "ruff"]
 dev = ["build", "shaq[test,lint]"]
 
 [tool.mypy]
-plugins = ["pydantic.mypy"]
-
 allow_redefinition = true
 check_untyped_defs = true
 disallow_incomplete_defs = true
@@ -64,4 +62,4 @@ line-length = 100
 [tool.ruff]
 line-length = 100
 select = ["E", "F", "I", "W", "UP"]
-target-version = "py311"
+target-version = "py310"
