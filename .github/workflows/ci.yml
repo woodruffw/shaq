@@ -15,6 +15,7 @@ jobs:
       - uses: actions/setup-python@v4.7.0
         with:
           python-version-file: pyproject.toml
+          cache-dependency-path: pyproject.toml
           cache: pip
 
       - name: install native dependencies
