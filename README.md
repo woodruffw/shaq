@@ -1,6 +1,7 @@
 # shaq
 
 [![CI](https://github.com/woodruffw/shaq/actions/workflows/ci.yml/badge.svg)](https://github.com/woodruffw/shaq/actions/workflows/ci.yml)
+[![PyPI version](https://badge.fury.io/py/shaq.svg)](https://badge.fury.io/py/shaq)
 
 A bare-bones CLI client for [Shazam](https://www.shazam.com/home).
 
