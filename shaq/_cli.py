@@ -3,6 +3,7 @@ import asyncio
 import json
 import logging
 import os
+import shutil
 import sys
 import wave
 from collections.abc import Iterator
@@ -164,6 +165,10 @@ def main() -> None:
     with _console() as console:
         logger.addHandler(RichHandler(console=console))
         logger.debug(f"parsed {args=}")
+
+        if not shutil.which("ffmpeg3"):
+            console.print("[red]Fatal: ffmpeg not found on $PATH[/red]")
+            sys.exit(1)
 
         try:
             raw = asyncio.run(_shaq(console, args))
