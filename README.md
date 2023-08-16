@@ -23,6 +23,8 @@ installed. On Debian-based systems:
 sudo apt install -y portaudio19-dev
 ```
 
+`shaq` is also available on the Arch User Repository as [`shaq`](https://aur.archlinux.org/packages/shaq).
+
 ## Usage
 
 Detect by listening to the system microphone:
