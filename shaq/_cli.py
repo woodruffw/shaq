@@ -166,7 +166,7 @@ def main() -> None:
         logger.addHandler(RichHandler(console=console))
         logger.debug(f"parsed {args=}")
 
-        if not shutil.which("ffmpeg3"):
+        if not shutil.which("ffmpeg"):
             console.print("[red]Fatal: ffmpeg not found on $PATH[/red]")
             sys.exit(1)
 
