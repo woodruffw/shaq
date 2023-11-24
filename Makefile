@@ -37,7 +37,7 @@ env/pyvenv.cfg: pyproject.toml
 .PHONY: lint
 lint: env/pyvenv.cfg
 	. env/bin/activate && \
-		black --check $(ALL_PY_SRCS) && \
+		ruff format --check $(ALL_PY_SRCS) && \
 		ruff $(ALL_PY_SRCS) && \
 		mypy $(PY_MODULE)
 
@@ -45,7 +45,7 @@ lint: env/pyvenv.cfg
 reformat: env/pyvenv.cfg
 	. env/bin/activate && \
 		ruff --fix $(ALL_PY_SRCS) && \
-		black $(ALL_PY_SRCS)
+		ruff format $(ALL_PY_SRCS)
 
 .PHONY: package
 package: env/pyvenv.cfg

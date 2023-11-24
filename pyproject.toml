@@ -36,7 +36,7 @@ shaq = "shaq._cli:main"
 
 [project.optional-dependencies]
 test = ["pytest", "pytest-cov", "pretend"]
-lint = ["black", "mypy", "ruff"]
+lint = ["mypy", "ruff"]
 dev = ["build", "shaq[test,lint]"]
 
 [tool.mypy]
@@ -56,10 +56,6 @@ warn_unreachable = true
 warn_unused_configs = true
 warn_unused_ignores = true
 
-[tool.black]
-line-length = 100
-
 [tool.ruff]
 line-length = 100
 select = ["E", "F", "I", "W", "UP"]
-target-version = "py310"
