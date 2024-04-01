@@ -20,7 +20,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - uses: actions/setup-python@v5.0.0
+    - uses: actions/setup-python@v5.1.0
       with:
         python-version-file: pyproject.toml
         cache-dependency-path: pyproject.toml
