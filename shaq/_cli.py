@@ -191,11 +191,15 @@ def main() -> None:
             print(f"Track: {track.track.title}")
             print(f"Artist: {track.track.subtitle}")
             if args.albumcover:
-                album_cover = raw["track"]["images"]["coverart"]
-                album_cover_hq = album_cover.replace(
-                    "/400x400cc.jpg", "/1000x1000cc.png"
-                )
-                print(f"Album Cover: {album_cover_hq}")
+                if "images" in raw["track"]:
+                    album_cover = raw["track"]["images"]["coverart"]
+                    album_cover_hq = album_cover.replace(
+                        "/400x400cc.jpg", "/1000x1000cc.png"
+                    )
+                    print(f"Album Cover: {album_cover_hq}")
+                else:
+                    print(f"Album Cover: NA Found")
                 
     if not track.matches:
         sys.exit(1)
+        
