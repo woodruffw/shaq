@@ -182,7 +182,7 @@ def main() -> None:
             sys.exit(2)
 
     if args.json:
-        print(raw)
+        json.dump(raw, sys.stdout, indent=2)
     else:
         track = Serialize.full_track(raw)
         if not track.matches:
