@@ -193,6 +193,8 @@ def main() -> None:
             if args.albumcover:
                 if "images" in raw["track"]:
                     album_cover = raw["track"]["images"]["coverart"]
+                    # Forces the shazam image server to fetch a
+                    # high-resolution album cover.
                     album_cover_hq = album_cover.replace(
                         "/400x400cc.jpg", "/1000x1000cc.png"
                     )
