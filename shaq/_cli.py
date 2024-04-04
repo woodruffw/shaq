@@ -133,10 +133,7 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "-j", "--json", action="store_true", help="emit Shazam's response as JSON on stdout"
     )
-    parser.add_argument(
-        "--albumcover", action="store_true", help="return url to HD album cover" 
-    )
-    
+    parser.add_argument("--albumcover", action="store_true", help="return url to HD album cover")
 
     advanced_group = parser.add_argument_group(
         title="Advanced Options",
@@ -195,11 +192,8 @@ def main() -> None:
                     album_cover = raw["track"]["images"]["coverart"]
                     # Forces the shazam image server to fetch a
                     # high-resolution album cover.
-                    album_cover_hq = album_cover.replace(
-                        "/400x400cc.jpg", "/1000x1000cc.png"
-                    )
+                    album_cover_hq = album_cover.replace("/400x400cc.jpg", "/1000x1000cc.png")
                     print(f"Album Cover: {album_cover_hq}")
-                
+
     if not track.matches:
         sys.exit(1)
-        
