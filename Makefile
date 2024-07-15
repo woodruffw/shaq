@@ -38,13 +38,13 @@ env/pyvenv.cfg: pyproject.toml
 lint: env/pyvenv.cfg
 	. env/bin/activate && \
 		ruff format --check $(ALL_PY_SRCS) && \
-		ruff $(ALL_PY_SRCS) && \
+		ruff check $(ALL_PY_SRCS) && \
 		mypy $(PY_MODULE)
 
 .PHONY: reformat
 reformat: env/pyvenv.cfg
 	. env/bin/activate && \
-		ruff --fix $(ALL_PY_SRCS) && \
+		ruff check --fix $(ALL_PY_SRCS) && \
 		ruff format $(ALL_PY_SRCS)
 
 .PHONY: package
