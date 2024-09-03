@@ -111,7 +111,8 @@ async def _shaq(console: Console, args: argparse.Namespace) -> dict[str, Any]:
         input = _from_file(console, args)
 
     shazam = Shazam(language="en-US", endpoint_country="US")
-    return await shazam.recognize(input)  # type: ignore
+
+    return await shazam.recognize(input, proxy=args.proxy)  # type: ignore
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -157,6 +158,11 @@ def _parser() -> argparse.ArgumentParser:
         type=int,
         default=_DEFAULT_SAMPLE_RATE,
         help="the sample rate to use; only affects --listen",
+    )
+    advanced_group.add_argument(
+        "--proxy",
+        type=str,
+        help="send the request to a proxy server",
     )
     return parser
 
