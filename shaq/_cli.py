@@ -112,7 +112,7 @@ async def _shaq(console: Console, args: argparse.Namespace) -> dict[str, Any]:
 
     shazam = Shazam(language="en-US", endpoint_country="US")
 
-    return await shazam.recognize(input, proxy=args.proxy)  # type: ignore
+    return await shazam.recognize_song(input, proxy=args.proxy)  # type: ignore
 
 
 def _parser() -> argparse.ArgumentParser:
