@@ -178,8 +178,9 @@ def main() -> None:
             sys.exit(1)
 
         try:
-            loop = asyncio.get_event_loop()
-            raw = loop.run_until_complete(_shaq(console, args))
+            if os.name == "nt":
+                asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+            raw = asyncio.run(_shaq(console, args))
             track = Serialize.full_track(raw)
         except KeyboardInterrupt:
             console.print("[red]Interrupted.[/red]")
