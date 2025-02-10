@@ -22,7 +22,7 @@ dependencies = [
     "pyaudio ~= 0.2.13",
     "pydub ~= 0.25.1",
     "rich ~= 13.4",
-    "shazamio >= 0.6,< 0.8",
+    "shazamio >= 0.6,< 0.9",
 ]
 requires-python = ">=3.10"
 
