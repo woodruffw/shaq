@@ -250,7 +250,8 @@ def main() -> None:
         if not args.json and track and track.matches and args.metadata:
             if args.listen:
                 console.print("[yellow]Metadata update is not supported for live recordings.[/yellow]")
-            updateMetadata(console, track.track.title, track.track.subtitle, args.input)
+            else:
+                updateMetadata(console, track.track.title, track.track.subtitle, args.input)
 
     if args.json and raw is not None:
         json.dump(raw, sys.stdout, indent=2)
