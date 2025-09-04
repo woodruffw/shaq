@@ -167,7 +167,7 @@ def _parser() -> argparse.ArgumentParser:
     advanced_group.add_argument(
         "--metadata",
         action="store_true",
-        help="Overwrite titel and metadata of the song",
+        help="Overwrite title and metadata of the song",
     )
     return parser
 
