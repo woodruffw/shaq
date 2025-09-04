@@ -46,7 +46,7 @@ shaq --input obscure.mp3
 # ...which can be overriden
 shaq --input obscure.mp3 --duration 15
 
-# shaq can overwrite titel and metadata if a match is found
+# shaq can overwrite title and metadata if a match is found
 shaq --input obscure.mp3 --metadata
 ```
 
