@@ -20,6 +20,12 @@ from rich.logging import RichHandler
 from rich.status import Status
 from shazamio import Serialize, Shazam
 
+from mutagen.flac import FLAC
+from mutagen.mp3 import MP3
+from mutagen.id3 import TPE2, TIT2, TPE1
+from mutagen.oggvorbis import OggVorbis
+
+
 logging.basicConfig(
     level=os.environ.get("SHAQ_LOGLEVEL", "INFO").upper(),
     format="%(message)s",
@@ -165,67 +171,61 @@ def _parser() -> argparse.ArgumentParser:
         help="send the request to a proxy server",
     )
     advanced_group.add_argument(
-        "--metadata",
+        "--edit-metadata",
         action="store_true",
-        help="Overwrite title and metadata of the song",
+        help="Overwrite metadata of the song",
+    )
+    advanced_group.add_argument(
+        "--edit-title",
+        action="store_true",
+        help="Overwrite title of the song",
     )
     return parser
 
-def updateMetadata(console, title, artist, path):
+def update_Metadata(console, title, artist, path):
     
-    # Imports happen here so that when this functionality is not used, mutagen is not needed to run the program
-    # This is to avoid unnecessary dependencies.
-
     try:
-        from mutagen.flac import FLAC
-        from mutagen.mp3 import MP3
-        from mutagen.id3 import TPE2, TIT2, TPE1
-        from mutagen.oggvorbis import OggVorbis
-    except ImportError:
-        console.print("[red]mutagen library is not installed. Install it with 'pip install mutagen'[/red]")
-        sys.exit(1)
-
-    ext = path.suffix.lower()
-    try:
-        audio = None
-        tag_map = {      
-            ".flac":  (FLAC, {"title": str, "artist": str, "albumartist": str}),
-            ".ogg":   (OggVorbis, {"title": str, "artist": str, "albumartist": str})
-
+        tag_map = {
+            ".flac":  (FLAC, {"title": title, "artist": artist, "albumartist": artist}),
+            ".ogg":   (OggVorbis, {"title": title, "artist": artist, "albumartist": artist}),
+            ".mp3":   (MP3, {
+                "TIT2": lambda audio: audio.__setitem__("TIT2", TIT2(encoding=3, text=title)),
+                "TPE1": lambda audio: audio.__setitem__("TPE1", TPE1(encoding=3, text=artist)),
+                "TPE2": lambda audio: audio.__setitem__("TPE2", TPE2(encoding=3, text=artist)),
+            }),
         }
 
-        # mp3 is separate because it uses ID3 tags
-        if ext == ".mp3":
-            audio = MP3(path)
-            if audio.tags is None:
-                audio.add_tags()
-            audio["TIT2"] = TIT2(encoding=3, text=title) # Title
-            audio["TPE1"] = TPE1(encoding=3, text=artist) # Contributing artist
-            audio["TPE2"] = TPE2(encoding=3, text=artist)  # Album artist
-            audio.save()
-        elif ext in tag_map:
-            cls, keys = tag_map[ext]
-            audio = cls(path)
-            for key in keys:
-                if key == "title":
-                    audio[key] = title
-                elif key == "artist":
-                    audio[key] = artist
-                elif key == "albumartist":
-                    audio[key] = artist
-            audio.save()
-        else:
+        ext = path.suffix.lower()
+
+        if ext not in tag_map:
             console.print(f"[yellow]File type {ext} not supported for metadata writing.[/yellow]")
             return
+        else:
+            cls, tags = tag_map[ext]
+            audio = cls(path)
+            if ext == ".mp3":
+                if audio.tags is None:
+                    audio.add_tags()
+                for key, func in tags.items():
+                    func(audio)
+            else:
+                for key, value in tags.items():
+                    audio[key] = value
+            audio.save()
+
+    except Exception as e:
+        console.print(f"[red]Failed to update metadata for {path}: {e}[/red]")
+
+def rename_File(console, title, artist, path):
+    try:
+        ext = path.suffix.lower()
 
         new_name = f"{title} - {artist}{ext}"
         new_path = path.with_name(new_name)
-        try:
-            path.rename(new_path)
-        except Exception as e:
-            console.print(f"[red]Failed to rename file: {e}[/red]")
+
+        path.rename(new_path)
     except Exception as e:
-        console.print(f"[red]Failed to update metadata for {path}: {e}[/red]")
+        console.print(f"[red]Failed to rename file: {e}[/red]")
 
 def main() -> None:
     args = _parser().parse_args()
@@ -247,14 +247,23 @@ def main() -> None:
             console.print("[red]Interrupted.[/red]")
             sys.exit(2)
 
-        if not args.json and track and track.matches and args.metadata:
+        if (
+            not args.json
+            and track
+            and track.matches
+            and (args.edit_metadata or args.edit_title)
+        ):
             if args.listen:
-                console.print("[yellow]Metadata update is not supported for live recordings.[/yellow]")
-            else:
-                updateMetadata(console, track.track.title, track.track.subtitle, args.input)
+                console.print("[yellow]Metadata/Filename editing is not supported for live recordings.[/yellow]")
+                return
+            if args.edit_metadata:
+                update_Metadata(console, track.track.title, track.track.subtitle, args.input)
+            if args.edit_title:
+                rename_File(console, track.track.title, track.track.subtitle, args.input)
 
     if args.json and raw is not None:
         json.dump(raw, sys.stdout, indent=2)
+
     elif track is not None:
         if not track.matches:
             print("No matches.")

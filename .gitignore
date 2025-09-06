@@ -1,1 +1,3 @@
 shaq/__pycache__/*
+.venv
+*.ps1

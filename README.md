@@ -47,7 +47,7 @@ shaq --input obscure.mp3
 shaq --input obscure.mp3 --duration 15
 
 # shaq can overwrite title and metadata if a match is found
-shaq --input obscure.mp3 --metadata
+shaq --input obscure.mp3 --edit-metadata --edit-title
 ```
 
 See `shaq --help` for more options.
