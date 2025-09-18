@@ -23,6 +23,7 @@ dependencies = [
     "pydub ~= 0.25.1",
     "rich >= 13.4,< 15.0",
     "shazamio >= 0.6,< 0.9",
+    "mutagen >=1.47.0,<2.0.0",
 ]
 requires-python = ">=3.10"
 
