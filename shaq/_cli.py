@@ -96,11 +96,11 @@ def _listen(console: Console, args: argparse.Namespace) -> bytearray:
 
 def _from_file(console: Console, args: argparse.Namespace) -> AudioSegment:
     with Status(f"Extracting from {args.input}", console=console):
-        input = AudioSegment.from_file(args.input)
-
-        # pydub measures things in milliseconds
-        duration = args.duration * 1000
-        return input[:duration]
+        data = AudioSegment.from_file(args.input, duration=args.duration)
+        
+        buffer = data.export(format="wav")
+        audio_data = buffer.read()
+        return audio_data
 
 
 async def _shaq(console: Console, args: argparse.Namespace) -> dict[str, Any]:
@@ -112,7 +112,7 @@ async def _shaq(console: Console, args: argparse.Namespace) -> dict[str, Any]:
 
     shazam = Shazam(language="en-US", endpoint_country="US")
 
-    return await shazam.recognize_song(input, proxy=args.proxy)  # type: ignore
+    return await shazam.recognize(input, proxy=args.proxy)  # type: ignore
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -178,6 +178,8 @@ def main() -> None:
             sys.exit(1)
 
         try:
+            if os.name == "nt":
+                asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
             raw = asyncio.run(_shaq(console, args))
             track = Serialize.full_track(raw)
         except KeyboardInterrupt:
