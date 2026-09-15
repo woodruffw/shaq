@@ -20,6 +20,12 @@ from rich.logging import RichHandler
 from rich.status import Status
 from shazamio import Serialize, Shazam
 
+from mutagen.flac import FLAC
+from mutagen.mp3 import MP3
+from mutagen.id3 import TPE2, TIT2, TPE1
+from mutagen.oggvorbis import OggVorbis
+
+
 logging.basicConfig(
     level=os.environ.get("SHAQ_LOGLEVEL", "INFO").upper(),
     format="%(message)s",
@@ -164,11 +170,68 @@ def _parser() -> argparse.ArgumentParser:
         type=str,
         help="send the request to a proxy server",
     )
+    advanced_group.add_argument(
+        "--edit-metadata",
+        action="store_true",
+        help="Overwrite metadata of the song",
+    )
+    advanced_group.add_argument(
+        "--edit-title",
+        action="store_true",
+        help="Overwrite title of the song",
+    )
     return parser
 
+def update_Metadata(console, title, artist, path):
+    
+    try:
+        tag_map = {
+            ".flac":  (FLAC, {"title": title, "artist": artist, "albumartist": artist}),
+            ".ogg":   (OggVorbis, {"title": title, "artist": artist, "albumartist": artist}),
+            ".mp3":   (MP3, {
+                "TIT2": lambda audio: audio.__setitem__("TIT2", TIT2(encoding=3, text=title)),
+                "TPE1": lambda audio: audio.__setitem__("TPE1", TPE1(encoding=3, text=artist)),
+                "TPE2": lambda audio: audio.__setitem__("TPE2", TPE2(encoding=3, text=artist)),
+            }),
+        }
+
+        ext = path.suffix.lower()
+
+        if ext not in tag_map:
+            console.print(f"[yellow]File type {ext} not supported for metadata writing.[/yellow]")
+            return
+        else:
+            cls, tags = tag_map[ext]
+            audio = cls(path)
+            if ext == ".mp3":
+                if audio.tags is None:
+                    audio.add_tags()
+                for key, func in tags.items():
+                    func(audio)
+            else:
+                for key, value in tags.items():
+                    audio[key] = value
+            audio.save()
+
+    except Exception as e:
+        console.print(f"[red]Failed to update metadata for {path}: {e}[/red]")
+
+def rename_File(console, title, artist, path):
+    try:
+        ext = path.suffix.lower()
+
+        new_name = f"{title} - {artist}{ext}"
+        new_path = path.with_name(new_name)
+
+        path.rename(new_path)
+    except Exception as e:
+        console.print(f"[red]Failed to rename file: {e}[/red]")
 
 def main() -> None:
     args = _parser().parse_args()
+    raw = None
+    track = None
+
     with _console() as console:
         logger.addHandler(RichHandler(console=console))
         logger.debug(f"parsed {args=}")
@@ -184,22 +247,35 @@ def main() -> None:
             console.print("[red]Interrupted.[/red]")
             sys.exit(2)
 
-    if args.json:
+        if (
+            not args.json
+            and track
+            and track.matches
+            and (args.edit_metadata or args.edit_title)
+        ):
+            if args.listen:
+                console.print("[yellow]Metadata/Filename editing is not supported for live recordings.[/yellow]")
+                return
+            if args.edit_metadata:
+                update_Metadata(console, track.track.title, track.track.subtitle, args.input)
+            if args.edit_title:
+                rename_File(console, track.track.title, track.track.subtitle, args.input)
+
+    if args.json and raw is not None:
         json.dump(raw, sys.stdout, indent=2)
-    else:
-        track = Serialize.full_track(raw)
+
+    elif track is not None:
         if not track.matches:
             print("No matches.")
-        else:
-            print(f"Track: {track.track.title}")
-            print(f"Artist: {track.track.subtitle}")
-            if args.albumcover:
-                if "images" in raw["track"]:
-                    album_cover = raw["track"]["images"]["coverart"]
-                    # Forces the shazam image server to fetch a
-                    # high-resolution album cover.
-                    album_cover_hq = album_cover.replace("/400x400cc.jpg", "/1000x1000cc.png")
-                    print(f"Album Cover: {album_cover_hq}")
+            sys.exit(1)
+        print(f"Track: {track.track.title}")
+        print(f"Artist: {track.track.subtitle}")
 
-    if not track.matches:
-        sys.exit(1)
+        if args.albumcover and "images" in raw["track"]:
+            album_cover = raw["track"]["images"]["coverart"]
+            # Forces the shazam image server to fetch a
+            # high-resolution album cover.
+            album_cover_hq = album_cover.replace("/400x400cc.jpg", "/1000x1000cc.png")
+            print(f"Album Cover: {album_cover_hq}")
+
+
